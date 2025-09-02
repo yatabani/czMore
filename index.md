@@ -18,13 +18,23 @@ Check out this [Demo](http://yatabani.com/czMore/example-latest.html)
 	<div id="czContainer">
 		<div id="first">
 			<div class="recordset">
-			<input type="text" name="stock_1_product" id="stock_1_product" />
+			<input type="text" name="stock_0_product" id="stock_0_product" />
 			</div>
 		</div>
 	</div>
 	<!-- The elements you want repeated must be wrapped in an element with id="recordset" -->
 	```
+Field names can be wrapped with underscores or brackets as such
 
+	```html
+	<div id="czContainer">
+		<div id="first">
+			<div class="recordset">
+				<input type="text name="stock[0].product id="stock[0].product" />
+			</div>
+		</div>
+	</div>
+	```
 2. Add to the buttom of the page and you are done.
 
 	```javascript
