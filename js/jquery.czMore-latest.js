@@ -20,6 +20,8 @@ MIT License, https://github.com/yatabani/czMore/blob/master/LICENSE.md
             onAdd: null,
             onDelete: null,
             styleOverride: false,
+            btnPlusHtml: null,
+            btnMinusHtml: null,
             countFieldPrefix: '_czMore_txtCount',
         };
         //Update unset options with defaults if needed
@@ -47,22 +49,26 @@ MIT License, https://github.com/yatabani/czMore/blob/master/LICENSE.md
             var set = recordset.children(".recordset").children().first();
             var btnPlus = obj.siblings("#btnPlus");
 
-            if(!options.styleOverride) {
-              btnPlus.css({
-                  'float': 'right',
-                  'border': '0px',
-                  'background-image': 'url("img/add.png")',
-                  'background-position': 'center center',
-                  'background-repeat': 'no-repeat',
-                  'height': '25px',
-                  'width': '25px',
-                  'cursor': 'pointer',
-              });
+            if (options.styleOverride && options.btnPlusHtml != null) {
+                console.log("test"); btnPlus = $(options.btnPlusHtml);
+                obj.after(btnPlus); // insert into DOM
+            }
+            else {
+                btnPlus.css({
+                    'float': 'right',
+                    'border': '0px',
+                    'background-image': 'url("../img/add.png")',
+                    'background-position': 'center center',
+                    'background-repeat': 'no-repeat',
+                    'height': '25px',
+                    'width': '25px',
+                    'cursor': 'pointer',
+                });
             }
 
             if (recordset.length) {
                 obj.siblings("#btnPlus").click(function () {
-                    if (isMaxRecordset()){
+                    if (isMaxRecordset()) {
                         return false;
                     }
                     var i = recordsetCount();
@@ -101,7 +107,7 @@ MIT License, https://github.com/yatabani/czMore/blob/master/LICENSE.md
 
             function resetNumbering() {
                 $(obj).children(".recordset").each(function (index, element) {
-                   $(element).find('input:text, input:password, input:file, select, textarea').each(function(){
+                    $(element).find('input:text, input:password, input:file, select, textarea').each(function () {
                         var old_name = this.name;
                         var new_name = old_name.replace(/\_([0-9]\d{0})\_/g, "_" + index + "_");
                         this.id = this.name = new_name;
@@ -112,22 +118,49 @@ MIT License, https://github.com/yatabani/czMore/blob/master/LICENSE.md
                 });
             }
 
+            function addRow() {
+                if (isMaxRecordset()) {
+                    return false;
+                }
+                var i = recordsetCount();
+                var item = recordset.clone().html();
+
+                item = item.replace(/\[([0-9]\d{0})\]/g, "[" + i + "]");
+                item = item.replace(/\_([0-9]\d{0})\_/g, "_" + i + "_");
+                i++;
+
+                obj.append(item);
+                loadMinus(obj.children().last());
+                minusClick(obj.children().last());
+                if (options.onAdd != null) {
+                    obj.trigger("onAdd", i);
+                }
+
+                obj.siblings("input[name$='" + options.countFieldPrefix + "']").val(i);
+                return false;
+            }
+
             function loadMinus(recordset) {
-                var divMinus = '<div id="btnMinus" class="btnMinus" />';
-                $(recordset).children().first().before(divMinus);
-                var btnMinus = $(recordset).children("#btnMinus");
-                if(!options.styleOverride) {
-                  btnMinus.css({
-                      'float': 'right',
-                      'border': '0px',
-                      'background-image': 'url("img/remove.png")',
-                      'background-position': 'center center',
-                      'background-repeat': 'no-repeat',
-                      'height': '25px',
-                      'width': '25px',
-                      'cursor': 'poitnter',
-                  });
-              }
+                var btnMinus;
+                if (options.styleOverride && options.btnMinusHtml != null) {
+                    $(recordset).children().first().before(options.btnMinusHtml);
+                    btnMinus = $(recordset).children().first().find("#btnMinus");
+                }
+                else {
+                    var divMinus = '<div id="btnMinus" class="btnMinus"></div>';
+                    $(recordset).children().first().before(divMinus);
+                    btnMinus = $(recordset).children("#btnMinus");
+                    btnMinus.css({
+                        'float': 'right',
+                        'border': '0px',
+                        'background-image': 'url("../img/remove.png")',
+                        'background-position': 'center center',
+                        'background-repeat': 'no-repeat',
+                        'height': '25px',
+                        'width': '25px',
+                        'cursor': 'pointer',
+                    });
+                }
             }
 
             function minusClick(recordset) {
@@ -145,12 +178,15 @@ MIT License, https://github.com/yatabani/czMore/blob/master/LICENSE.md
                 });
             }
 
-            function recordsetCount(){
+            function recordsetCount() {
                 return obj.children(".recordset").length;
             }
 
-            function isMaxRecordset(){
+            function isMaxRecordset() {
                 return recordsetCount() >= options.max;
+            }
+            for (var i = 0; i < options.min; i++) {
+                addRow();
             }
         });
     };
